@@ -1,14 +1,14 @@
 "use client";
 import React, { useCallback, useEffect, useState } from "react";
-import assign from "../../assets/assign.png";
+// import assign from "../../assets/assign.png";
 import upload from "../../assets/upload.png";
-import figma from "../../assets/figma.png";
-import file from "../../assets/file.png";
-import Dropdown from "../../assets/Dropdown.png";
-import gallery from "../../assets/gallery.png";
-import frame from "../../assets/frame.png";
-import Checkbox from "../../assets/Checkbox.png";
-import Search from "../../assets/Search.png";
+// import figma from "../../assets/figma.png";
+// import file from "../../assets/file.png";
+// import Dropdown from "../../assets/Dropdown.png";
+// import gallery from "../../assets/gallery.png";
+// import frame from "../../assets/frame.png";
+// import Checkbox from "../../assets/Checkbox.png";
+// import Search from "../../assets/Search.png";
 import Image from "next/image";
 import { MdDeleteOutline } from "react-icons/md";
 import axios from "axios";
@@ -28,7 +28,7 @@ import { RxCross2 } from "react-icons/rx";
 function Page() {
   const { data } = useAuthContext();
   // const orgid = data?.orgid?.[0];
-  const [orgid, setOrgid] = useState("")
+  const [orgid, setOrgid] = useState("");
   const [dataa, setDataa] = useState([]);
   const [uploadpop, setUploadpop] = useState(false);
   const [filename, setFilename] = useState("");
@@ -43,7 +43,20 @@ function Page() {
       const res = await axios.get(`${API}/fetchstorage/${orgid}`);
       if (res.data.success) {
         setDataa(res.data.storage);
-        console.log(res.data.storageused)
+        console.log(res.data.storageused);
+        setFilestorage(res.data.storageused);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, [orgid]);
+
+  const fetchstorageFromUser = useCallback(async () => {
+    try {
+      const res = await axios.get(`${API}/fetchstorageuser/${data?.id}`);
+      if (res.data.success) {
+        setDataa(res.data.storage);
+        console.log(res.data.storageused);
         setFilestorage(res.data.storageused);
       }
     } catch (e) {
@@ -60,9 +73,9 @@ function Page() {
   };
 
   useEffect(() => {
-    const s = localStorage.getItem("orgid")
-    setOrgid(s)
-  }, [])
+    const s = localStorage.getItem("orgid");
+    setOrgid(s);
+  }, []);
 
   const uploadfile = async (file) => {
     try {
@@ -122,6 +135,8 @@ function Page() {
   useEffect(() => {
     if (orgid) {
       fetchstorage();
+    } else {
+      fetchstorageFromUser();
     }
   }, [orgid]);
 
@@ -132,10 +147,8 @@ function Page() {
   const convertFromBytes = (kilobytes) => {
     if (kilobytes >= 1024 * 1024)
       return (kilobytes / (1024 * 1024)).toFixed(2) + " GB";
-    if (kilobytes >= 1024)
-      return (kilobytes / 1024).toFixed(2) + " MB";
-    if (kilobytes > 0)
-      return kilobytes.toFixed(2) + " KB";
+    if (kilobytes >= 1024) return (kilobytes / 1024).toFixed(2) + " MB";
+    if (kilobytes > 0) return kilobytes.toFixed(2) + " KB";
     return "0 KB";
   };
 
@@ -147,8 +160,7 @@ function Page() {
     return Math.min(widthPercentage, 100);
   };
 
-  console.log(calculateWidthPercentage(filestorage), "filestorage")
-
+  console.log(calculateWidthPercentage(filestorage), "filestorage");
 
   const handleSearch = (e) => {
     const value = e.target.value;
@@ -157,7 +169,6 @@ function Page() {
       const filteredResults = dataa.filter((item) =>
         item.filename.toLowerCase().includes(value.toLowerCase())
       );
-      //setDataa(filteredResults);
       setSearchResults(filteredResults);
     } else {
       setSearchResults([]);
@@ -197,7 +208,9 @@ function Page() {
                 </div>
                 <div className="w-full h-3 mt-2 relative overflow-hidden min-w-[100px] bg-white rounded-full">
                   <div
-                    style={{ width: `${calculateWidthPercentage(filestorage)}%` }}
+                    style={{
+                      width: `${calculateWidthPercentage(filestorage)}%`,
+                    }}
                     className="absolute top-0 left-0 rounded-r-xl z-10 bg-[#08A0F7] h-full"
                   />
                 </div>
@@ -268,8 +281,9 @@ function Page() {
                     {searchResults.map((d, i) => (
                       <div
                         key={i}
-                        className={`flex flex-row ${i % 2 === 0 ? "bg-[#EAECF0]" : "bg-white"
-                          } justify-evenly items-center w-full border-b-[1px] border-gray-200 h-[50px] text-center px-4 text-[#1E1E1E] `}
+                        className={`flex flex-row ${
+                          i % 2 === 0 ? "bg-[#EAECF0]" : "bg-white"
+                        } justify-evenly items-center w-full border-b-[1px] border-gray-200 h-[50px] text-center px-4 text-[#1E1E1E] `}
                       >
                         <div className="sm:w-[30%] w-[60%] text-left">
                           {truncatetext(d.filename, 30)}
@@ -294,9 +308,7 @@ function Page() {
                             <div
                               className="text-[14px] cursor-pointer text-[#0C78E3]"
                               onClick={() => handledownload(d.objectName)}
-                            >
-
-                            </div>
+                            ></div>
                           </div>
                         </div>
                       </div>
@@ -313,8 +325,9 @@ function Page() {
                     {dataa.map((d, i) => (
                       <div
                         key={i}
-                        className={`flex flex-row ${i % 2 === 0 ? "bg-[#EAECF0]" : "bg-white"
-                          } justify-evenly items-center w-full border-b-[1px] border-gray-200 h-[50px] text-center px-4 text-[#1E1E1E] `}
+                        className={`flex flex-row ${
+                          i % 2 === 0 ? "bg-[#EAECF0]" : "bg-white"
+                        } justify-evenly items-center w-full border-b-[1px] border-gray-200 h-[50px] text-center px-4 text-[#1E1E1E] `}
                       >
                         <div className="sm:w-[30%] w-[60%] text-left">
                           {truncatetext(d.filename, 30)}

@@ -1,6 +1,7 @@
 import { io } from "socket.io-client";
 
-const socketUrl = "http://localhost:8100";
+// const socketUrl = "http://localhost:8100";
+const socketUrl = "https://realsync.nexoo.site/api";
 
 const socket = io(socketUrl, {
   reconnectionAttempts: 100,

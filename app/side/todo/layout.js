@@ -15,14 +15,13 @@ export default function SideLayout({ children }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [teamtasks, setTeamtasks] = useState(false);
   const { data } = useAuthContext();
-  const path = usePathname()
+  const path = usePathname();
 
   const userdata = async () => {
     try {
       const response = await axios.get(`${API}/getuserdata/${data.id}`);
 
       console.log(response?.data, "response.data");
-
     } catch (e) {
       console.error("No User found", e.message);
     }
@@ -44,7 +43,6 @@ export default function SideLayout({ children }) {
     setTeamtasks(false);
   };
 
-
   return (
     <div className="font-sans h-full w-full scrollbar-hide flex flex-col sm:justify-evenly items-center ">
       {/* Creating task */}
@@ -55,10 +53,11 @@ export default function SideLayout({ children }) {
             onClick={() => {
               setSwtch(0);
             }}
-            className={`font-semibold text-[16px] select-none cursor-pointer ${path === "/side/todo/Mytask"
-              ? " text-[#ffffff] bg-[#FFC977] p-2 rounded-xl"
-              : "text-[#4e4e4e] bg-[#ffc97700] p-2 rounded-xl"
-              }`}
+            className={`font-semibold text-[16px] select-none cursor-pointer ${
+              path == "/side/todo" || path === "/side/todo/Mytask"
+                ? " text-[#ffffff] bg-[#FFC977] p-2 rounded-xl"
+                : "text-[#4e4e4e] bg-[#ffc97700] p-2 rounded-xl"
+            }`}
           >
             My tasks
           </Link>
@@ -67,10 +66,11 @@ export default function SideLayout({ children }) {
             onClick={() => {
               setSwtch(1);
             }}
-            className={`font-semibold text-[16px] select-none cursor-pointer ${path === "/side/todo/Teamtask"
-              ? " text-[#ffffff] bg-[#FFC977] p-2 rounded-xl"
-              : "text-[#4e4e4e] bg-[#ffc97700] p-2 rounded-xl"
-              }`}
+            className={`font-semibold text-[16px] select-none cursor-pointer ${
+              path === "/side/todo/Teamtask"
+                ? " text-[#ffffff] bg-[#FFC977] p-2 rounded-xl"
+                : "text-[#4e4e4e] bg-[#ffc97700] p-2 rounded-xl"
+            }`}
           >
             Team tasks
           </Link>

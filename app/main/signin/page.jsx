@@ -23,7 +23,7 @@ function LoginPage() {
     access_token: "",
     refresh_token: "",
   });
-  const [email, setEmail] = useState("fsayush100@gmail.com"); // State for email input
+  const [email, setEmail] = useState("devanshi@gmail.com"); // State for email input
   const [password, setPassword] = useState("12345678"); // State for password input
   const [organization, setOrganization] = useState([]);
   const { setData } = useAuthContext();
@@ -41,26 +41,37 @@ function LoginPage() {
         // org: organization,
       });
 
-      console.log(response.data);
-
       if (response.data.success) {
         const details = response.data.user;
-        setPopup(true);
-        setOrganization(response.data.organistions);
-        setData(response.data.data);
-        setToken({
-          access_token: response.data.access_token,
-          refresh_token: response.data.refresh_token,
-        });
-        dispatch(
-          userData({
-            id: details._id,
-            organization: details.organization,
-            email: details.email,
-          })
-        );
 
-        // router.push("../side/todo");
+        if (response.data.organistions.length > 0) {
+          setPopup(true);
+          setOrganization(response.data.organistions);
+          setData(response.data.data);
+          setToken({
+            access_token: response.data.access_token,
+            refresh_token: response.data.refresh_token,
+          });
+          dispatch(
+            userData({
+              id: details._id,
+              organization: details.organization,
+              email: details.email,
+            })
+          );
+        } else {
+          const expirationDate = new Date();
+          expirationDate.setDate(expirationDate.getDate() + 7);
+          setData(response.data.data);
+          Cookies.set("nexo-data-1", response.data?.access_token, {
+            expires: expirationDate,
+          });
+          Cookies.set("nexo-data-2", response.data?.refresh_token, {
+            expires: expirationDate,
+          });
+
+          router.push("../side/todo");
+        }
       } else {
         router.push("../main/signup");
       }

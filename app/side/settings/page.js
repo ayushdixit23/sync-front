@@ -17,7 +17,6 @@ function page() {
   // const cook = decryptaes(cookie);
   // const d = JSON.parse(cook);
   const { data, setAuth, setData } = useAuthContext();
-
   const router = useRouter();
   const id = data.id;
   const [load, setLoad] = useState(false);
@@ -28,16 +27,22 @@ function page() {
   const [prevdetails, setPrevdetails] = useState();
   const [loggout, setLoggout] = useState(false);
   const [clicklog, setClicklog] = useState(0);
+  const [code, setCode] = useState("");
   const [option, setOption] = useState(0);
+  const [orgid, setOrgid] = useState("");
+
   const userdata = async () => {
     try {
-      const response = await axios.get(`${API}/getuserdata/${data?.id}`);
+      const response = await axios.post(`${API}/v1/getuserdata/${data?.id}`, {
+        orgid,
+      });
       const dataa = response.data;
       setPrevdetails(response.data);
       setName(dataa?.user?.name);
       setRole(dataa?.user?.jobrole);
       setEmail(dataa?.user?.email);
       setPassword(dataa?.user?.password);
+      setCode(dataa?.code);
       // const userid = dataa.find((e) => e._id === d._id);
       // if (userid) {
       //   setName(userid.username);
@@ -48,6 +53,11 @@ function page() {
       console.error("No User found", e.message);
     }
   };
+
+  useEffect(() => {
+    const s = localStorage.getItem("orgid");
+    setOrgid(s);
+  }, []);
 
   const logout = () => {
     // Clear cookie
@@ -64,7 +74,7 @@ function page() {
     if (data?.id && data?.id != "undefined") {
       userdata();
     }
-  }, [data?.id]);
+  }, [data?.id, orgid]);
 
   // logout function
   const handleLogout = () => {
@@ -109,8 +119,9 @@ function page() {
           </div>
           <div
             className={`flex justify-between
-           px-1 h-[50px] items-center border-b-[1px] ${option === 0 ? "bg-[#fafafa]" : "bg-[#fff]"
-              } hover:bg-[#fafafa] hover:rounded-lg border-[#f1f1f1] mt-2`}
+           px-1 h-[50px] items-center border-b-[1px] ${
+             option === 0 ? "bg-[#fafafa]" : "bg-[#fff]"
+           } hover:bg-[#fafafa] hover:rounded-lg border-[#f1f1f1] mt-2`}
           >
             <div className="font-medium text-[#3e3e3e]">Edit profile</div>
             <div className="text-[#7e7e7e]">
@@ -164,7 +175,6 @@ function page() {
         <div className="h-full w-[75%] pn:max-sm:hidden bg-white rounded-2xl flex flex-col items-center justify-center">
           {/* dp */}
           <div className="w-full h-[100px] mt-2 flex items-center justify-center flex-col">
-
             <div className="h-[65px] w-[65px] bg-[#fff] overflow-hidden rounded-full mb-4">
               <img src={data?.dp} className="w-full h-full object-cover" />
             </div>
@@ -237,6 +247,15 @@ function page() {
               />
             </div>
 
+            <div className="h-[70px] w-full flex flex-col items-center mt-2 ">
+              <div className="w-[50%] font-semibold text-[#3e3e3e] ">Code </div>
+              <input
+                value={code}
+                className="h-[50%] w-[50%] border-b-2 border-[#c7c5c5] outline-none"
+                placeholder="Enter you jobrole"
+              />
+            </div>
+
             <div className="flex mt-2  w-[80%] justify-end">
               <div className="bg-[#F1F2F3] p-2 rounded-md font-semibold text-[12px] justify-center items-center flex">
                 Cancel
@@ -252,13 +271,14 @@ function page() {
                     editdetails();
                   }
                 }}
-                className={`p-2 text-white ${prevdetails?.user?.name === name &&
+                className={`p-2 text-white ${
+                  prevdetails?.user?.name === name &&
                   prevdetails?.user?.email === email &&
                   prevdetails?.user?.jobrole === role &&
                   prevdetails?.user?.password === password
-                  ? "bg-[#ffdead]"
-                  : "bg-[#FFC977] "
-                  }  rounded-md font-semibold text-[12px] ml-4`}
+                    ? "bg-[#ffdead]"
+                    : "bg-[#FFC977] "
+                }  rounded-md font-semibold text-[12px] ml-4`}
               >
                 {load ? (
                   <div className="animate-spin">
@@ -293,8 +313,9 @@ function page() {
                   setClicklog(0);
                   setLoggout(false);
                 }}
-                className={`text-[#000] ${clicklog === 0 ? "bg-[#e5e5e5]" : "bg-white"
-                  } bg-[#e5e5e5] hover:bg-[#f2f2f2] px-4 py-2 rounded-xl  text-[14px]`}
+                className={`text-[#000] ${
+                  clicklog === 0 ? "bg-[#e5e5e5]" : "bg-white"
+                } bg-[#e5e5e5] hover:bg-[#f2f2f2] px-4 py-2 rounded-xl  text-[14px]`}
               >
                 Cancel
               </div>
@@ -303,8 +324,9 @@ function page() {
                   setClicklog(1);
                   handleLogout();
                 }}
-                className={`text-red-600 ${clicklog === 1 ? "bg-[#e5e5e5]" : "bg-white"
-                  } hover:bg-[#f2f2f2] px-4 py-2 rounded-xl text-[14px]`}
+                className={`text-red-600 ${
+                  clicklog === 1 ? "bg-[#e5e5e5]" : "bg-white"
+                } hover:bg-[#f2f2f2] px-4 py-2 rounded-xl text-[14px]`}
               >
                 Logout
               </div>

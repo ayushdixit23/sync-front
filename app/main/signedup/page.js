@@ -16,41 +16,53 @@ import { useAuthContext } from "@/utils/auth";
 
 function page() {
   const router = useRouter();
-  const email = useSelector((state) => state.signup.email)
-  const password = useSelector((state) => state.signup.password)
-  const image = useSelector((state) => state.signup.image)
-  const fullname = useSelector((state) => state.signup.name)
-  const organisationlist = useSelector((state) => state.signup.organisationlist)
+  const email = useSelector((state) => state.signup.email);
+  const password = useSelector((state) => state.signup.password);
+  const image = useSelector((state) => state.signup.image);
+  const fullname = useSelector((state) => state.signup.name);
+  const organisationlist = useSelector(
+    (state) => state.signup.organisationlist
+  );
   const dispatch = useDispatch();
   const [org, setOrg] = useState("");
-  const { setData } = useAuthContext()
-  const [orgid, setOrgid] = useState("")
+  const { setData } = useAuthContext();
+  const [orgid, setOrgid] = useState("");
   const [jobrole, setJobrole] = useState("");
   const [join, setJoin] = useState(0);
-  const [dp, setDp] = useState("")
-  const [code, setCode] = useState("")
-  const [popup, setPopup] = useState(false)
-  const [inviteCode, setInviteCode] = useState("")
+  const [dp, setDp] = useState("");
+  const [code, setCode] = useState("");
+  const [popup, setPopup] = useState(false);
+  const [inviteCode, setInviteCode] = useState("");
 
   const handleSubmit = async () => {
     try {
-      const formData = new FormData()
-      formData.append("email", email)
-      formData.append("fullname", fullname)
-      formData.append("password", password)
-      formData.append("profile", dp)
-      formData.append("dp", image)
-      formData.append("org", org)
-      formData.append("inviteCode", code)
+      const formData = new FormData();
+      formData.append("email", email);
+      formData.append("fullname", fullname);
+      formData.append("password", password);
+      formData.append("profile", dp);
+      formData.append("dp", image);
+      formData.append("org", org);
+      formData.append("inviteCode", code);
       const response = await axios.post(`${API}/signup`, formData);
       if (response.status === 200) {
-        await cookieSetter(response.data)
+        const expirationDate = new Date();
+        expirationDate.setDate(expirationDate.getDate() + 7);
+        Cookies.set("nexo-data-1", response.data?.access_token, {
+          expires: expirationDate,
+        });
+        Cookies.set("nexo-data-2", response.data?.refresh_token, {
+          expires: expirationDate,
+        });
 
+        setData(data?.data);
+
+        localStorage.setItem("orgid", response.data?.orgId);
+        localStorage.setItem("orgtitle", org);
+        router.push("../side/todo");
       } else {
         console.log("User unable to signup");
       }
-
-
     } catch (error) {
       console.error("Error creating user:", error.message);
       // Handle the error (e.g., display an error message to the user)
@@ -58,8 +70,9 @@ function page() {
   };
 
   const generatecode = async () => {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'; // Character set
-    let code = '';
+    const characters =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"; // Character set
+    let code = "";
 
     // Generate a 17-character long code
     for (let i = 0; i < 17; i++) {
@@ -72,9 +85,8 @@ function page() {
   };
 
   useEffect(() => {
-    generatecode()
-  }, [])
-
+    generatecode();
+  }, []);
 
   const cookieSetter = async (data) => {
     try {
@@ -87,7 +99,7 @@ function page() {
         expires: expirationDate,
       });
 
-      setData(data?.data)
+      setData(data?.data);
 
       localStorage.setItem("orgid", orgid);
       localStorage.setItem("orgtitle", org);
@@ -99,72 +111,73 @@ function page() {
 
   const signupAsIndividual = async () => {
     try {
-      const formData = new FormData()
-      formData.append("email", email)
-      formData.append("fullname", fullname)
-      formData.append("password", password)
-      formData.append("dp", image)
-      formData.append("org", org)
-      formData.append("orgid", orgid)
-      const response = await axios.post(`${API}/signup`, formData);
-      if (response.status === 200) {
-        await cookieSetter(response.data)
+      const formData = new FormData();
+      formData.append("email", email);
+      formData.append("fullname", fullname);
+      formData.append("password", password);
+      formData.append("dp", image);
 
+      const response = await axios.post(`${API}/signupind`, formData);
+      if (response.status === 200) {
+        await cookieSetter(response.data);
       } else {
         console.log("User unable to signup");
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   const signedupWithJoinOrgansition = async () => {
     try {
-      const formData = new FormData()
-      formData.append("email", email)
-      formData.append("fullname", fullname)
-      formData.append("password", password)
-      formData.append("dp", image)
-      const response = await axios.post(`${API}/signupind`, formData);
+      const formData = new FormData();
+      formData.append("email", email);
+      formData.append("fullname", fullname);
+      formData.append("password", password);
+      formData.append("dp", image);
+      formData.append("org", org);
+      formData.append("orgid", orgid);
+      const response = await axios.post(`${API}/signup`, formData);
       if (response.status === 200) {
-        await cookieSetter(response.data)
-
+        await cookieSetter(response.data);
       } else {
         console.log("User unable to signup");
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   const fetchOrg = async () => {
     try {
-      const res = await axios.get(`${API}/fetchAllOrganisation`)
-      dispatch(setOrganisationList(res.data?.organization))
-      dispatch(setUrl(res.data?.url))
+      const res = await axios.get(`${API}/fetchAllOrganisation`);
+      dispatch(setOrganisationList(res.data?.organization));
+      dispatch(setUrl(res.data?.url));
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   const checkInviteCode = async () => {
     try {
-      const res = await axios.post(`${API}/checkInviteCode/${orgid}`, { code: inviteCode })
+      const res = await axios.post(`${API}/checkInviteCode/${orgid}`, {
+        code: inviteCode,
+      });
       if (res.data.success) {
         if (res.data.isMatched) {
-          signedupWithJoinOrgansition()
+          signedupWithJoinOrgansition();
         }
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
       //const imageUrl = await convertImageToDataURL(file);
-      setDp(file)
+      setDp(file);
     }
   };
 
@@ -178,7 +191,6 @@ function page() {
 
   return (
     <>
-
       {popup && (
         <div className="flex justify-center items-center h-screen fixed inset-0  w-full">
           <div id="default-modal" tabindex="-1" aria-hidden="true" class=" ">
@@ -247,7 +259,6 @@ function page() {
         </div>
       )}
 
-
       <div className="w-screen font-sans h-screen bg-[#FFC977] flex justify-center items-center">
         <div className="flex flex-row w-[80%] h-[80%] items-center justify-between max-lg:justify-center">
           <Image
@@ -282,7 +293,7 @@ function page() {
                 </div>
                 <div
                   onClick={() => {
-                    fetchOrg()
+                    fetchOrg();
                     setJoin(2);
                   }}
                   className="text-[16px] hover:bg-[#f1e4d0] flex justify-center items-center font-semibold h-[40px] w-[300px] rounded-2xl bg-[#FFC977] text-black"
@@ -309,7 +320,6 @@ function page() {
                   <div className="text-black text-[20px] font-semibold">
                     Enter your organization's details
                   </div>
-
                 </div>
 
                 <div className=" h-[340px] flex flex-col justify-evenly">
@@ -318,7 +328,11 @@ function page() {
                   <div className="w-full  flex flex-col  justify-center items-center">
                     <label className="relative flex items-center flex-col">
                       <img
-                        src={dp ? URL.createObjectURL(dp) : "/placeholder-image.png"}
+                        src={
+                          dp
+                            ? URL.createObjectURL(dp)
+                            : "/placeholder-image.png"
+                        }
                         alt="Choose"
                         className="rounded-full text-[8px] bg-gray-200 h-[50px] w-[50px]"
                       />
@@ -328,9 +342,13 @@ function page() {
                         className="absolute inset-0 opacity-0 cursor-pointer h-12 w-full rounded-full"
                       />
                       {!dp ? (
-                        <div className="mt-2 text-[10px] text-black">Upload</div>
+                        <div className="mt-2 text-[10px] text-black">
+                          Upload
+                        </div>
                       ) : (
-                        <div className="mt-2 text-[10px] text-black">{dp.name}</div>
+                        <div className="mt-2 text-[10px] text-black">
+                          {dp.name}
+                        </div>
                       )}
                       {/* <div className="text-sm mt-2">{imge}</div> */}
                     </label>
@@ -338,7 +356,7 @@ function page() {
                       <button
                         className="mt-1 text-[10px] underline text-red-500 hover:text-red-700 focus:outline-none"
                         onClick={() => {
-                          setDp("")
+                          setDp("");
                         }}
                       >
                         Remove
@@ -360,7 +378,6 @@ function page() {
                     />
                   </div>
 
-
                   <div>
                     <div className="text-[14px] font-sans font-semibold text-black">
                       Generate Code <span className="text-red-500">*</span>
@@ -371,7 +388,12 @@ function page() {
                       className=" my-2 text-[#808080] text-[12px] px-2 flex justify-center items-center border-2 outline-none rounded-lg h-[40px] w-[350px]"
                     />
 
-                    <div onClick={generatecode} className="cursor-pointer text-sm">Generate new code</div>
+                    <div
+                      onClick={generatecode}
+                      className="cursor-pointer text-sm"
+                    >
+                      Generate new code
+                    </div>
                   </div>
 
                   {/* Enter Location */}
@@ -467,28 +489,33 @@ function page() {
                   {organisationlist?.map((d) => (
                     <div className="flex justify-between items-center px-3">
                       <div>{d?.title}</div>
-                      <div onClick={() => {
-                        setOrg(d?.title)
-                        setOrgid(d?._id)
-                      }}>
+                      <div
+                        onClick={() => {
+                          setOrg(d?.title);
+                          setOrgid(d?._id);
+                        }}
+                      >
                         Join
                       </div>
                     </div>
                   ))}
                 </div>
                 {/* Continue */}
-                {join === 1 ? < div
-                  onClick={handleSubmit}
-                  className="bg-[#E48700] text-white text-[12px] flex justify-center items-center rounded-lg h-[40px] w-[350px]"
-                >
-                  Next
-                </div> : < div
-                  onClick={() => setPopup(true)}
-                  className="bg-[#E48700] text-white text-[12px] flex justify-center items-center rounded-lg h-[40px] w-[350px]"
-                >
-                  {org ? `Join ${org}` : "Next"}
-                </div>
-                }
+                {join === 1 ? (
+                  <div
+                    onClick={handleSubmit}
+                    className="bg-[#E48700] text-white text-[12px] flex justify-center items-center rounded-lg h-[40px] w-[350px]"
+                  >
+                    Next
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => setPopup(true)}
+                    className="bg-[#E48700] text-white text-[12px] flex justify-center items-center rounded-lg h-[40px] w-[350px]"
+                  >
+                    {org ? `Join ${org}` : "Next"}
+                  </div>
+                )}
               </div>
             ) : null}
             {/* <div className="flex flex-col">
@@ -549,7 +576,7 @@ function page() {
           </div> */}
           </div>
         </div>
-      </div >
+      </div>
     </>
   );
 }
